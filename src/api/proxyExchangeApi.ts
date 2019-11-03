@@ -11,11 +11,10 @@ export class ProxyExchangeApi {
             return;
         }
 
-        console.log(req.query.cp);
+        //console.log(req.query.cp);
 
         const exchangeRepo: ExchangeRepository = ExchangeRepository.instance;
 
-        // データ取得
         let promises = [];
         for (const cpParam of req.query.cp) {
             var paramElems = cpParam.split('_');
@@ -25,7 +24,7 @@ export class ProxyExchangeApi {
                 return;
             }
 
-            // 指定された取引所＋通貨ペアのみか確認する
+            // check exchange x currency pair
             const exchangeId = Number(paramElems[0]);
             const exchange = exchangeRepo.getExchange(exchangeId);
             if (exchange === null) {
@@ -49,15 +48,14 @@ export class ProxyExchangeApi {
             promises.push(promise);
         }
 
-        Promise.all(promises).then( function (orderbook) {
-            console.log("orderbook: " + JSON.stringify(orderbook));
+        Promise.all(promises).then((orderbook) => {
+            //console.log("orderbook: " + JSON.stringify(orderbook));
             res.send(JSON.stringify(orderbook));
         })
-        .catch( function (reason) {
+        .catch((reason) => {
             console.log(reason);
             res.sendStatus(500);
             return;
         });        
     }
-
 }
