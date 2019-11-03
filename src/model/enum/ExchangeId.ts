@@ -18,7 +18,6 @@ namespace ExchangeId {
             case ExchangeId.AidosMarket:
             case ExchangeId.IDAX:
             case ExchangeId.STEX:
-            case ExchangeId.fatbtc:
                 return false;
             default:
                 return true;

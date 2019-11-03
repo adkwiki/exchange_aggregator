@@ -3,7 +3,8 @@ export enum CurrencyId {
     BTC,
     ETH,
     USD,
-    EUR
+    EUR,
+    USDT
 }
 
 export interface ICurrencyPair {

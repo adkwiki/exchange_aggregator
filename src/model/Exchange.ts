@@ -1,9 +1,16 @@
 import { ExchangeId } from './enum/ExchangeId';
 import { ICurrencyPair } from './enum/CurrencyId';
+import { ApiAccessType } from './enum/ApiAccessType';
 
-export enum ApiAccessType {
-    plane = 0,
-    cloudflare
+export enum OrderBookUrlType {
+    all = 1,
+    buy,
+    sell
+}
+
+export interface IApiUrlOrderBook {
+    orderBookUrlType: OrderBookUrlType;
+    url: string;
 }
 
 export class Exchange {
@@ -11,7 +18,7 @@ export class Exchange {
     private _currencyPairArray: ICurrencyPair[];
     private _apiAccessType: ApiAccessType;
     private _apiUrlBase: string;
-    private _apiUrlOrderbook: string;
+    private _apiUrlOrderbook: IApiUrlOrderBook[];
     private _apiUrlBridgePrice: string | null;
     private _pairSymbolFunction: (currencyPair: ICurrencyPair) => string;
 
@@ -19,7 +26,7 @@ export class Exchange {
         exchangeId: ExchangeId,
         apiAccessType: ApiAccessType,
         apiUrlBase: string,
-        apiUrlOrderbook: string,
+        apiUrlOrderbook: IApiUrlOrderBook[],
         apiUrlBridgePrice: string | null,
         currencyPairArray: ICurrencyPair[],
         pairSymbolFunction: (currencyPair: ICurrencyPair) => string)
@@ -56,13 +63,24 @@ export class Exchange {
         return this._apiUrlBase;
     }
 
-    get apiUrlOrderbook(): string {
+    /*
+    get apiUrlOrderbook(): IApiUrlOrderBook[] {
         return this._apiUrlOrderbook;
+    }*/
+
+    getApiUrlOrderbook(orderBookUrlType: OrderBookUrlType): string {
+        for (const apiTypeAndUrl of this._apiUrlOrderbook) {
+            if (apiTypeAndUrl.orderBookUrlType === orderBookUrlType) {
+                return apiTypeAndUrl.url;
+            }
+        }
+        throw new Error(`unknown orderBookUrlType ${orderBookUrlType}`);
     }
 
     get apiUrlBridgePrice(): string | null {
         return this._apiUrlBridgePrice;
     }
+
 
     getPairSymbol(currencyPair: ICurrencyPair): string {
         return this._pairSymbolFunction(currencyPair);
