@@ -32,8 +32,9 @@ export class ProxyExchangeApi {
                 res.sendStatus(400);
                 return;
             }
-            const currencyPair = {left: Number(paramElems[1]), right: Number(paramElems[2])};
-            if (exchangeRepo.isExistsCurrencyPair(exchangeId, currencyPair)) {
+
+            const currencyPair = exchangeRepo.getCurrencyPair(exchangeId, {left: Number(paramElems[1]), right: Number(paramElems[2])});
+            if (currencyPair === null) {
                 console.log(`invalid param : currencyPair ${paramElems}`)
                 res.sendStatus(400);
                 return;

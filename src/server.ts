@@ -2,6 +2,7 @@ import express from 'express';
 
 import { ProxyExchangeApi } from './api/proxyExchangeApi';
 
+// api endpoint
 const PORT = process.env.PORT || 3000;
 const app = express();
 app.get('/proxy_exchange_api', (req, res) => {
@@ -13,3 +14,6 @@ app.get('/proxy_exchange_api', (req, res) => {
     }
 });
 app.listen(PORT, () => console.log(`Example app listening on port ${PORT}!`));
+
+// TODO cycle exec : mainte service status
+// cycle 15min?

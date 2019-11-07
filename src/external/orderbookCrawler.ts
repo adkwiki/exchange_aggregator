@@ -14,16 +14,11 @@ export interface IRawOrderBook {
 }
 
 export class OrderbookCrawler {
-    private _exchange: Exchange;
-    private _currencyPair: ICurrencyPair;
-
-    constructor(exchange: Exchange, currencyPair: ICurrencyPair) {
-        this._exchange = exchange;
-        this._currencyPair = currencyPair;
+    constructor(readonly exchange: Exchange, readonly currencyPair: ICurrencyPair) {
     }
 
     async crawl() {
-        switch(this._exchange.apiAccessType) {
+        switch(this.exchange.apiAccessType) {
         case ApiAccessType.plane:
             return this.execute();
         case ApiAccessType.cloudflare:
@@ -31,13 +26,13 @@ export class OrderbookCrawler {
         case ApiAccessType.askBidSplitInterface:
             return this.executeAskBidSplitInterface();
         default:
-            throw new Error(`unknown ApiAccessType ${this._exchange.apiAccessType}`);
+            throw new Error(`unknown ApiAccessType ${this.exchange.apiAccessType}`);
         }
     }
 
     private getAxiosClient() {
         return axios.create({
-            baseURL: this._exchange.apiUrlBase,
+            baseURL: this.exchange.apiUrlBase,
             headers: {
               'Content-Type': 'application/json',
             },
@@ -48,7 +43,7 @@ export class OrderbookCrawler {
     private async execute(){
         const axiosClient = this.getAxiosClient();
 
-        const orderbookUrl = `${this._exchange.getApiUrlOrderbook(OrderBookUrlType.all)}${this._exchange.getPairSymbol(this._currencyPair)}`;
+        const orderbookUrl = `${this.exchange.getApiUrlOrderbook(OrderBookUrlType.all)}${this.exchange.getPairSymbol(this.currencyPair)}`;
         //console.log("orderbookUrl:" + orderbookUrl);
 
         const orderbookResponse = await axiosClient.get(orderbookUrl);
@@ -57,17 +52,19 @@ export class OrderbookCrawler {
         await this.sleep(500);
 
         let bridgePairJson = null;
-        if (this._currencyPair.right != CurrencyId.BTC) {
-            // need bridge
-            const bridgePair: ICurrencyPair = {left: this._currencyPair.right, right: CurrencyId.BTC};
-            const bridgePairUrl = `${this._exchange.apiUrlBridgePrice}${this._exchange.getPairSymbol(bridgePair)}`;
+        if (this.currencyPair.right != CurrencyId.BTC) {
+            if (this.currencyPair.bridge === undefined) {
+                throw new Error(`invalid pair ${this.exchange.exchangeId} ${this.currencyPair.left} ${this.currencyPair.right}`);
+            }
+            const bridgePair: ICurrencyPair = {left: this.currencyPair.bridge.left, right: this.currencyPair.bridge.right};
+            const bridgePairUrl = `${this.exchange.apiUrlBridgePrice}${this.exchange.getPairSymbol(bridgePair)}`;
             const bridgePriceResponse = await axiosClient.get(bridgePairUrl);
             bridgePairJson = JSON.stringify(bridgePriceResponse.data);
         }
 
         return {
-            exchangeId: this._exchange.exchangeId,
-            currencyPair: this._currencyPair,
+            exchangeId: this.exchange.exchangeId,
+            currencyPair: this.currencyPair,
             orderbookJson: JSON.stringify(orderbookResponse.data),
             bridgePairJson: bridgePairJson};
     }
@@ -79,11 +76,11 @@ export class OrderbookCrawler {
         let results: IRawOrderBook[] = [];
 
         // buy
-        let orderbookUrl = `${this._exchange.getApiUrlOrderbook(OrderBookUrlType.buy)}${this._exchange.getPairSymbol(this._currencyPair)}`;
+        let orderbookUrl = `${this.exchange.getApiUrlOrderbook(OrderBookUrlType.buy)}${this.exchange.getPairSymbol(this.currencyPair)}`;
         const orderbookResponseBuy = await axiosClient.get(orderbookUrl);
 
         // sell
-        orderbookUrl = `${this._exchange.getApiUrlOrderbook(OrderBookUrlType.sell)}${this._exchange.getPairSymbol(this._currencyPair)}`;
+        orderbookUrl = `${this.exchange.getApiUrlOrderbook(OrderBookUrlType.sell)}${this.exchange.getPairSymbol(this.currencyPair)}`;
         const orderbookResponseSell = await axiosClient.get(orderbookUrl);
         
         const meargedOrderbook = {
@@ -92,19 +89,19 @@ export class OrderbookCrawler {
         }
 
         return {
-            exchangeId: this._exchange.exchangeId,
-            currencyPair: this._currencyPair,
+            exchangeId: this.exchange.exchangeId,
+            currencyPair: this.currencyPair,
             orderbookJson: JSON.stringify(meargedOrderbook),
             bridgePairJson: null};
     }
 
     private async executeBypassCloudflare(){
 
-        const orderbookUrl = `${this._exchange.getApiUrlOrderbook(OrderBookUrlType.all)}${this._exchange.getPairSymbol(this._currencyPair)}`;
+        const orderbookUrl = `${this.exchange.getApiUrlOrderbook(OrderBookUrlType.all)}${this.exchange.getPairSymbol(this.currencyPair)}`;
 
         const options = {
             method: 'GET',
-            uri: `${this._exchange.apiUrlBase}${orderbookUrl}`,
+            uri: `${this.exchange.apiUrlBase}${orderbookUrl}`,
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -113,8 +110,8 @@ export class OrderbookCrawler {
         const oderbookResponse = await cloudscraper.get(options)
     
         return {
-            exchangeId: this._exchange.exchangeId,
-            currencyPair: this._currencyPair,
+            exchangeId: this.exchange.exchangeId,
+            currencyPair: this.currencyPair,
             orderbookJson: JSON.stringify(oderbookResponse),
             bridgePairJson: null};
     }

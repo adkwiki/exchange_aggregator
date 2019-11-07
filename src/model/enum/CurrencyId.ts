@@ -8,6 +8,7 @@ export enum CurrencyId {
 }
 
 export interface ICurrencyPair {
-    left: CurrencyId,
-    right: CurrencyId
+    readonly left: CurrencyId,
+    readonly right: CurrencyId,
+    readonly bridge?: {left: CurrencyId, right: CurrencyId}
 }

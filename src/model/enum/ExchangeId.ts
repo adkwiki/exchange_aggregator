@@ -9,20 +9,8 @@ enum ExchangeId {
     STEX,
     CoinBene,
     fatbtc,
-    DEXTRADE
-}
-
-namespace ExchangeId {
-    export function supportAggregate(exchangeId: ExchangeId) {
-        switch (exchangeId) {
-            case ExchangeId.AidosMarket:
-            case ExchangeId.IDAX:
-            case ExchangeId.STEX:
-                return false;
-            default:
-                return true;
-        }
-    }
+    DEXTRADE,
+    BITLOCUS
 }
 
 export {ExchangeId};
