@@ -14,19 +14,15 @@ export interface IApiUrlOrderBook {
 }
 
 export class Exchange {
-    private _pairSymbolFunction: (currencyPair: ICurrencyPair) => string;
 
-    constructor(
+    protected constructor(
         readonly exchangeId: ExchangeId,
         readonly apiAccessType: ApiAccessType,
         readonly apiUrlBase: string,
         readonly apiUrlOrderbook: IApiUrlOrderBook[],
         readonly apiUrlBridgePrice: string | null,
-        readonly currencyPairArray: ICurrencyPair[],
-        pairSymbolFunction: (currencyPair: ICurrencyPair) => string)
-    {
-        this._pairSymbolFunction = pairSymbolFunction;
-    }
+        readonly currencyPairArray: ICurrencyPair[])
+    {}
 
     get exchangeName(): string {
         return ExchangeId[this.exchangeId];
@@ -42,6 +38,6 @@ export class Exchange {
     }
 
     getPairSymbol(currencyPair: ICurrencyPair): string {
-        return this._pairSymbolFunction(currencyPair);
+        throw new Error("NEED OVERRIDE");
     }
 }
