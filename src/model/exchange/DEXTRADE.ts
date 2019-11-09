@@ -4,6 +4,7 @@ import { ApiAccessType } from "../enum/ApiAccessType";
 import { CurrencyId, ICurrencyPair, currencyPairFormat } from "../enum/CurrencyId";
 
 export class DEXTRADE extends Exchange {
+    // TODO order not exists
     constructor() {
         super(ExchangeId.DEXTRADE,
             ApiAccessType.plane,
@@ -17,7 +18,8 @@ export class DEXTRADE extends Exchange {
             ]);
     }
 
-    getPairSymbol(currencyPair: ICurrencyPair): string {
-        return currencyPairFormat(currencyPair, true);
+    getPairSymbol(pair: ICurrencyPair): string {
+        return currencyPairFormat(pair, true);
     }
+
 }

@@ -2,6 +2,20 @@ import { Exchange, OrderBookUrlType } from "../Exchange";
 import { ExchangeId } from "../enum/ExchangeId";
 import { ApiAccessType } from "../enum/ApiAccessType";
 import { CurrencyId, ICurrencyPair, currencyPairFormat } from "../enum/CurrencyId";
+import { OrderBook, Order, getSuccessOrderBook, getErrorOrderBook } from "../OrderBook";
+
+interface IOrdreBook_IDAX {
+    code: number;
+    asks: [string, string][];
+    bids: [string, string][];
+}
+
+interface IBridgePrice_IDAX {
+    code: number;
+    ticker: [{
+        last: string;
+    }]
+}
 
 export class IDAX extends Exchange {
     constructor() {
@@ -16,7 +30,35 @@ export class IDAX extends Exchange {
             ]);
     }
 
-    getPairSymbol(currencyPair: ICurrencyPair): string {
-        return currencyPairFormat(currencyPair, true, "_");
+    getPairSymbol(pair: ICurrencyPair): string {
+        return currencyPairFormat(pair, true, "_");
+    }
+
+    getNormalizationOrderBook(pair: ICurrencyPair, jsonObject: any): OrderBook {
+
+        const originOrderBook = <IOrdreBook_IDAX>jsonObject;
+        if(originOrderBook.code !== 10000) {
+            return getErrorOrderBook(this.exchangeId, pair);
+        }
+
+        const buyOrderBook = [];
+        for (const order of originOrderBook.bids) {
+            buyOrderBook.push(new Order(Number(order[0]), Number(order[1])));
+        }
+
+        const sellOrderBook = [];
+        for (const order of originOrderBook.asks) {
+            sellOrderBook.push(new Order(Number(order[0]), Number(order[1])));
+        }
+
+        return getSuccessOrderBook(this.exchangeId, pair, buyOrderBook, sellOrderBook);
+    }
+
+    getBridgePrice(jsonObject: any): number {
+        const originBridgePrice = <IBridgePrice_IDAX>jsonObject;
+        if(originBridgePrice.code !== 10000) {
+            throw new Error("failed : getBridgePrice");
+        }
+        return Number(originBridgePrice.ticker[0].last);
     }
 }

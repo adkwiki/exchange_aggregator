@@ -1,6 +1,7 @@
 import { ExchangeId } from './enum/ExchangeId';
 import { ICurrencyPair } from './enum/CurrencyId';
 import { ApiAccessType } from './enum/ApiAccessType';
+import { OrderBook } from './OrderBook';
 
 export enum OrderBookUrlType {
     all = 1,
@@ -21,7 +22,8 @@ export class Exchange {
         readonly apiUrlBase: string,
         readonly apiUrlOrderbook: IApiUrlOrderBook[],
         readonly apiUrlBridgePrice: string | null,
-        readonly currencyPairArray: ICurrencyPair[])
+        readonly currencyPairArray: ICurrencyPair[],
+        readonly apiCallInterval: number = 0)
     {}
 
     get exchangeName(): string {
@@ -37,7 +39,15 @@ export class Exchange {
         throw new Error(`unknown orderBookUrlType ${orderBookUrlType}`);
     }
 
-    getPairSymbol(currencyPair: ICurrencyPair): string {
+    getPairSymbol(pair: ICurrencyPair): string {
+        throw new Error(`NEED OVERRIDE ${pair}`);
+    }
+
+    getNormalizationOrderBook(pair: ICurrencyPair, jsonObject: any): OrderBook {
+        throw new Error(`NEED OVERRIDE ${pair}`);
+    }
+
+    getBridgePrice(jsonObject: any): number {
         throw new Error("NEED OVERRIDE");
     }
 }

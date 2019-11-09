@@ -5,12 +5,15 @@ var cloudscraper = require('cloudscraper');
 import { ICurrencyPair, CurrencyId } from "../model/enum/CurrencyId";
 import { ExchangeId } from "../model/enum/ExchangeId";
 import { ApiAccessType } from "../model/enum/ApiAccessType";
+import { P2PB2B } from "../model/exchange/P2PB2B";
+import { getErrorOrderBook, getSuccessOrderBook, OrderBook } from "../model/OrderBook";
 
-export interface IRawOrderBook {
+export interface INormalizationOrderBook {
     exchangeId: ExchangeId;
     currencyPair: ICurrencyPair;
-    orderbookJson: string;
-    bridgePairJson: string | null;
+    orderbook: OrderBook;
+    bridgePrice: number | null;
+    bridgeCoefficient: number | null;
 }
 
 export class OrderbookCrawler {
@@ -40,18 +43,43 @@ export class OrderbookCrawler {
         });
     }
 
-    private async execute(){
+    private generateResult(
+        orderbook: OrderBook,
+        bridgePrice: number | null,
+        bridgeCoefficient: number | null): INormalizationOrderBook
+    {
+        return {
+            exchangeId: this.exchange.exchangeId,
+            currencyPair: this.currencyPair,
+            orderbook: orderbook,
+            bridgePrice: bridgePrice,
+            bridgeCoefficient: bridgeCoefficient
+        };
+    }
+
+
+    private async execute() {
         const axiosClient = this.getAxiosClient();
 
         const orderbookUrl = `${this.exchange.getApiUrlOrderbook(OrderBookUrlType.all)}${this.exchange.getPairSymbol(this.currencyPair)}`;
         //console.log("orderbookUrl:" + orderbookUrl);
 
         const orderbookResponse = await axiosClient.get(orderbookUrl);
+        // TODO error response
         //console.log("orderbookResponse:" + JSON.stringify(orderbookResponse.data));
 
-        await this.sleep(500);
+        const orderbook = this.exchange.getNormalizationOrderBook(this.currencyPair, orderbookResponse.data);
+        //console.log("orderBook:" + JSON.stringify(orderBook));
+        if (orderbook.isVoid()) {
+            return this.generateResult(orderbook, null, null);
+        }
 
-        let bridgePairJson = null;
+        if (this.exchange.apiCallInterval !== 0) {
+            await this.sleep(this.exchange.apiCallInterval);
+        }
+
+        let bridgeCoefficient = null;
+        let bridgePrice = null;
         if (this.currencyPair.right != CurrencyId.BTC) {
             if (this.currencyPair.bridge === undefined) {
                 throw new Error(`invalid pair ${this.exchange.exchangeId} ${this.currencyPair.left} ${this.currencyPair.right}`);
@@ -59,40 +87,42 @@ export class OrderbookCrawler {
             const bridgePair: ICurrencyPair = {left: this.currencyPair.bridge.left, right: this.currencyPair.bridge.right};
             const bridgePairUrl = `${this.exchange.apiUrlBridgePrice}${this.exchange.getPairSymbol(bridgePair)}`;
             const bridgePriceResponse = await axiosClient.get(bridgePairUrl);
-            bridgePairJson = JSON.stringify(bridgePriceResponse.data);
+            bridgePrice = this.exchange.getBridgePrice(bridgePriceResponse.data);
+
+            if (this.currencyPair.bridge.left === CurrencyId.BTC) {
+                // TODO toFix?
+                bridgeCoefficient = 1 / bridgePrice;
+            } else {
+                bridgeCoefficient = bridgePrice;
+            }
         }
 
-        return {
-            exchangeId: this.exchange.exchangeId,
-            currencyPair: this.currencyPair,
-            orderbookJson: JSON.stringify(orderbookResponse.data),
-            bridgePairJson: bridgePairJson};
+        return this.generateResult(orderbook, bridgePrice, bridgeCoefficient);
     }
 
     private async executeAskBidSplitInterface(){
         // for P2PB2B
         const axiosClient = this.getAxiosClient();
 
-        let results: IRawOrderBook[] = [];
-
         // buy
         let orderbookUrl = `${this.exchange.getApiUrlOrderbook(OrderBookUrlType.buy)}${this.exchange.getPairSymbol(this.currencyPair)}`;
         const orderbookResponseBuy = await axiosClient.get(orderbookUrl);
+        const orderbookBuy = (<P2PB2B>this.exchange).getNormalizationOrderBookAskBidSplit(orderbookResponseBuy.data);
+        if (orderbookBuy === null) {
+            return this.generateResult(getErrorOrderBook(this.exchange.exchangeId, this.currencyPair), null, null);
+        }
 
         // sell
         orderbookUrl = `${this.exchange.getApiUrlOrderbook(OrderBookUrlType.sell)}${this.exchange.getPairSymbol(this.currencyPair)}`;
         const orderbookResponseSell = await axiosClient.get(orderbookUrl);
-        
-        const meargedOrderbook = {
-            buy: orderbookResponseBuy.data,
-            sell: orderbookResponseSell.data,
+        const orderbookSell = (<P2PB2B>this.exchange).getNormalizationOrderBookAskBidSplit(orderbookResponseSell.data);
+        if (orderbookSell === null) {
+            return this.generateResult(getErrorOrderBook(this.exchange.exchangeId, this.currencyPair), null, null);
         }
+        
+        const meargedOrderbook = getSuccessOrderBook(this.exchange.exchangeId, this.currencyPair, orderbookBuy, orderbookSell);
 
-        return {
-            exchangeId: this.exchange.exchangeId,
-            currencyPair: this.currencyPair,
-            orderbookJson: JSON.stringify(meargedOrderbook),
-            bridgePairJson: null};
+        return this.generateResult(meargedOrderbook, null, null);
     }
 
     private async executeBypassCloudflare(){
@@ -107,13 +137,10 @@ export class OrderbookCrawler {
             },
             json: true
         }
-        const oderbookResponse = await cloudscraper.get(options)
-    
-        return {
-            exchangeId: this.exchange.exchangeId,
-            currencyPair: this.currencyPair,
-            orderbookJson: JSON.stringify(oderbookResponse),
-            bridgePairJson: null};
+        const orderbookResponse = await cloudscraper.get(options);
+        const orderbook = this.exchange.getNormalizationOrderBook(this.currencyPair, orderbookResponse);
+
+        return this.generateResult(orderbook, null, null);
     }
 
     private sleep(time: number) {

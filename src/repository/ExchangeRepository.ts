@@ -34,7 +34,8 @@ export class ExchangeRepository {
     this._exchangeArray.push(ExchangeFactory.createInstance(STEX));
     this._exchangeArray.push(ExchangeFactory.createInstance(CoinBene));
     this._exchangeArray.push(ExchangeFactory.createInstance(fatbtc));
-    this._exchangeArray.push(ExchangeFactory.createInstance(DEXTRADE));
+    // order not exists
+    //this._exchangeArray.push(ExchangeFactory.createInstance(DEXTRADE));
     this._exchangeArray.push(ExchangeFactory.createInstance(BITLOCUS));
   }
 
