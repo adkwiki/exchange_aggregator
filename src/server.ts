@@ -1,10 +1,13 @@
 import express from 'express';
+import cors from 'cors';
 
 import { ProxyExchangeApi } from './api/proxyExchangeApi';
 
 // api endpoint
 const PORT = process.env.PORT || 3000;
 const app = express();
+
+app.use(cors());
 
 // proxy & normalize orderbook api
 app.get('/proxy_exchange_api', (req, res) => {
