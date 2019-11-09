@@ -42,7 +42,8 @@
     "axios": "^0.19.0",
     "cloudscraper": "^4.3.0",
     "express": "^4.17.1",
-    "pg": "^7.12.1"
+    "pg": "^7.12.1",
+    "request": "^2.88.0"
   },
   "devDependencies": {
     "jest": "^24.9.0",
