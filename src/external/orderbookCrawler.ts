@@ -64,8 +64,13 @@ export class OrderbookCrawler {
         const orderbookUrl = `${this.exchange.getApiUrlOrderbook(OrderBookUrlType.all)}${this.exchange.getPairSymbol(this.currencyPair)}`;
         //console.log("orderbookUrl:" + orderbookUrl);
 
-        const orderbookResponse = await axiosClient.get(orderbookUrl);
-        // TODO error response
+        let orderbookResponse;
+        try {
+            orderbookResponse = await axiosClient.get(orderbookUrl);
+        } catch(error) {
+            console.log(error);
+            return this.generateResult(getErrorOrderBook(this.exchange.exchangeId, this.currencyPair), null, null);
+        }
         //console.log("orderbookResponse:" + JSON.stringify(orderbookResponse.data));
 
         const orderbook = this.exchange.getNormalizationOrderBook(this.currencyPair, orderbookResponse.data);
@@ -86,7 +91,15 @@ export class OrderbookCrawler {
             }
             const bridgePair: ICurrencyPair = {left: this.currencyPair.bridge.left, right: this.currencyPair.bridge.right};
             const bridgePairUrl = `${this.exchange.apiUrlBridgePrice}${this.exchange.getPairSymbol(bridgePair)}`;
-            const bridgePriceResponse = await axiosClient.get(bridgePairUrl);
+            
+            let bridgePriceResponse;
+            try {
+                bridgePriceResponse = await axiosClient.get(bridgePairUrl);
+            } catch(error) {
+                console.log(error);
+                return this.generateResult(getErrorOrderBook(this.exchange.exchangeId, this.currencyPair), null, null);
+            }
+                
             bridgePrice = this.exchange.getBridgePrice(bridgePriceResponse.data);
 
             if (this.currencyPair.bridge.left === CurrencyId.BTC) {
@@ -106,7 +119,14 @@ export class OrderbookCrawler {
 
         // buy
         let orderbookUrl = `${this.exchange.getApiUrlOrderbook(OrderBookUrlType.buy)}${this.exchange.getPairSymbol(this.currencyPair)}`;
-        const orderbookResponseBuy = await axiosClient.get(orderbookUrl);
+        let orderbookResponseBuy;
+        try {
+            orderbookResponseBuy = await axiosClient.get(orderbookUrl);
+        } catch(error) {
+            console.log(error);
+            return this.generateResult(getErrorOrderBook(this.exchange.exchangeId, this.currencyPair), null, null);
+        }
+
         const orderbookBuy = (<P2PB2B>this.exchange).getNormalizationOrderBookAskBidSplit(orderbookResponseBuy.data);
         if (orderbookBuy === null) {
             return this.generateResult(getErrorOrderBook(this.exchange.exchangeId, this.currencyPair), null, null);
@@ -114,7 +134,15 @@ export class OrderbookCrawler {
 
         // sell
         orderbookUrl = `${this.exchange.getApiUrlOrderbook(OrderBookUrlType.sell)}${this.exchange.getPairSymbol(this.currencyPair)}`;
-        const orderbookResponseSell = await axiosClient.get(orderbookUrl);
+    
+        let orderbookResponseSell;
+        try {
+            orderbookResponseSell = await axiosClient.get(orderbookUrl);
+        } catch(error) {
+            console.log(error);
+            return this.generateResult(getErrorOrderBook(this.exchange.exchangeId, this.currencyPair), null, null);
+        }
+
         const orderbookSell = (<P2PB2B>this.exchange).getNormalizationOrderBookAskBidSplit(orderbookResponseSell.data);
         if (orderbookSell === null) {
             return this.generateResult(getErrorOrderBook(this.exchange.exchangeId, this.currencyPair), null, null);
@@ -137,7 +165,15 @@ export class OrderbookCrawler {
             },
             json: true
         }
-        const orderbookResponse = await cloudscraper.get(options);
+
+        let orderbookResponse;
+        try {
+            orderbookResponse = await cloudscraper.get(options);
+        } catch(error) {
+            console.log(error);
+            return this.generateResult(getErrorOrderBook(this.exchange.exchangeId, this.currencyPair), null, null);
+        }
+
         const orderbook = this.exchange.getNormalizationOrderBook(this.currencyPair, orderbookResponse);
 
         return this.generateResult(orderbook, null, null);
