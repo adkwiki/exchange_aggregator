@@ -27,14 +27,15 @@ export class ExchangeRepository {
     this._exchangeArray.push(ExchangeFactory.createInstance(AidosMarket));
     this._exchangeArray.push(ExchangeFactory.createInstance(Coineal));
     this._exchangeArray.push(ExchangeFactory.createInstance(CoinTiger));
-    this._exchangeArray.push(ExchangeFactory.createInstance(EXRATES));
+    // TODO avoid api call limit : cache? 
+    //this._exchangeArray.push(ExchangeFactory.createInstance(EXRATES));
     this._exchangeArray.push(ExchangeFactory.createInstance(HitBTC));
     this._exchangeArray.push(ExchangeFactory.createInstance(IDAX));
     this._exchangeArray.push(ExchangeFactory.createInstance(P2PB2B));
     this._exchangeArray.push(ExchangeFactory.createInstance(STEX));
     this._exchangeArray.push(ExchangeFactory.createInstance(CoinBene));
     this._exchangeArray.push(ExchangeFactory.createInstance(fatbtc));
-    // order not exists
+    // TODO order not exists
     //this._exchangeArray.push(ExchangeFactory.createInstance(DEXTRADE));
     this._exchangeArray.push(ExchangeFactory.createInstance(BITLOCUS));
   }
