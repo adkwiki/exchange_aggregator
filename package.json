@@ -8,9 +8,7 @@
     "build-ts": "tsc",
     "postinstall": "yarn run build-ts",
     "start": "yarn run serve",
-    "serve": "node dist/server.js",
-    "watch-node": "nodemon dist/server.js",
-    "watch-ts": "tsc -w"
+    "serve": "node dist/server.js"
   },
   "repository": "git+https://github.com/adkwiki/exchange_aggregator.git",
   "author": "m2Lower",
@@ -41,6 +39,7 @@
     "cloudscraper": "^4.3.0",
     "cors": "^2.8.5",
     "express": "^4.17.1",
+    "node-cron": "^2.0.3",
     "request": "^2.88.0"
   },
   "devDependencies": {
@@ -48,11 +47,10 @@
     "@types/express": "^4.17.2",
     "@types/node": "^12.12.7",
     "jest": "^24.9.0",
-    "nodemon": "^1.19.4",
     "prettier": "^1.18.2",
-    "supertest": "^4.0.2",
     "ts-jest": "^24.1.0",
     "ts-loader": "^6.2.1",
+    "tslint": "^5.20.1",
     "tslint-config-prettier": "^1.18.0",
     "tslint-plugin-prettier": "^2.0.1",
     "typescript": "^3.6.4",
