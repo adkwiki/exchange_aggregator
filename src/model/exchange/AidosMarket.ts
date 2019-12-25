@@ -36,13 +36,38 @@ export class AidosMarket extends Exchange {
 
         const originOrderBook = <IOrdreBook_AidosMarket>jsonObject;
 
+        // ignore broken order
+        let originOrderBookBid = originOrderBook["order-book"].bid;
+        let originOrderBookAsk = originOrderBook["order-book"].ask;
+
+        let isBlokenBidSide = false;
+        while (originOrderBookBid[0].order_amount < 0) {
+            originOrderBookBid.shift();
+            isBlokenBidSide = true;
+        }
+      
+        let isBlokenAskSide = false;
+        while (originOrderBookAsk[0].order_amount < 0) {
+            originOrderBookAsk.shift();
+            isBlokenAskSide = true;
+        }
+      
+        while (originOrderBookAsk[0].price <= originOrderBookBid[0].price) {
+          if (isBlokenBidSide) {
+            originOrderBookBid.shift();
+          }
+          if (isBlokenAskSide) {
+            originOrderBookAsk.shift();
+          }
+        }
+            
         const buyOrderBook = [];
-        for (const order of originOrderBook["order-book"].bid) {
+        for (const order of originOrderBookBid) {
             buyOrderBook.push(new Order(order.price, order.order_amount))
         }
 
         const sellOrderBook = [];
-        for (const order of originOrderBook["order-book"].ask) {
+        for (const order of originOrderBookAsk) {
             sellOrderBook.push(new Order(order.price, order.order_amount))
         }
 
