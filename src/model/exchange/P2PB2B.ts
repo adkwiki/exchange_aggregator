@@ -39,8 +39,26 @@ export class P2PB2B extends Exchange {
         }
 
         const orderBook: Order[] = [];
+        let beforeOrder = null;
         for (const order of originOrderBook.result.orders) {
-            orderBook.push(new Order(Number(order.price), Number(order.amount)));
+            const price = Number(order.price);
+            const amount = Number(order.amount);
+
+            if (beforeOrder === null) {
+                // top order
+                beforeOrder = new Order(price, amount);
+            } else if (beforeOrder.price === price) {
+                // same price order
+                beforeOrder = new Order(price, beforeOrder.volume + amount);
+            } else {
+                // switch price
+                orderBook.push(beforeOrder);
+                beforeOrder = new Order(price, amount);
+            }
+        }
+
+        if (beforeOrder !== null) {
+            orderBook.push(beforeOrder);
         }
 
         return orderBook;
