@@ -6,17 +6,17 @@ import { OrderBook, getSuccessOrderBook, Order } from "../OrderBook";
 
 interface IOrdreBook_EXRATES {
     SELL: [{
-        amount: number;
-        rate: number;
+        amount: string;
+        rate: string;
     }];
     BUY: [{
-        amount: number;
-        rate: number;
+        amount: string;
+        rate: string;
     }];
 }
 
 interface IBridgePrice_EXRATES {
-    last: number;
+    last: string;
 }
 
 export class EXRATES extends Exchange {
@@ -44,12 +44,12 @@ export class EXRATES extends Exchange {
 
         const buyOrderBook = [];
         for (const order of originOrderBook.BUY) {
-            buyOrderBook.push(new Order(order.rate, order.amount));
+            buyOrderBook.push(new Order(Number(order.rate), Number(order.amount)));
         }
 
         const sellOrderBook = [];
         for (const order of originOrderBook.SELL) {
-            sellOrderBook.push(new Order(order.rate, order.amount));
+            sellOrderBook.push(new Order(Number(order.rate), Number(order.amount)));
         }
 
         return getSuccessOrderBook(this.exchangeId, pair, buyOrderBook, sellOrderBook);
@@ -57,6 +57,6 @@ export class EXRATES extends Exchange {
 
     getBridgePrice(jsonObject: any): number {
         const originBridgePrice = <IBridgePrice_EXRATES[]>jsonObject;
-        return originBridgePrice[0].last;
+        return Number(originBridgePrice[0].last);
     }
 }
