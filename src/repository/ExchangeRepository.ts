@@ -27,8 +27,7 @@ export class ExchangeRepository {
     this._exchangeArray.push(ExchangeFactory.createInstance(AidosMarket));
     this._exchangeArray.push(ExchangeFactory.createInstance(Coineal));
     this._exchangeArray.push(ExchangeFactory.createInstance(CoinTiger));
-    // TODO avoid api call limit : cache? 
-    //this._exchangeArray.push(ExchangeFactory.createInstance(EXRATES));
+    this._exchangeArray.push(ExchangeFactory.createInstance(EXRATES));
     this._exchangeArray.push(ExchangeFactory.createInstance(HitBTC));
     this._exchangeArray.push(ExchangeFactory.createInstance(IDAX));
     this._exchangeArray.push(ExchangeFactory.createInstance(P2PB2B));
@@ -73,4 +72,5 @@ export class ExchangeRepository {
 
     return null;
   }
+
 }

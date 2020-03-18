@@ -30,7 +30,8 @@ export class EXRATES extends Exchange {
                 {left: CurrencyId.ADK, right: CurrencyId.BTC},
                 {left: CurrencyId.ADK, right: CurrencyId.ETH, bridge: {left: CurrencyId.ETH, right: CurrencyId.BTC}}
             ],
-            100);
+            100,
+            120);
     }
 
     getPairSymbol(pair: ICurrencyPair): string {

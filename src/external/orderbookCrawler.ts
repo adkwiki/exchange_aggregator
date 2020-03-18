@@ -7,6 +7,7 @@ import { ExchangeId } from "../model/enum/ExchangeId";
 import { ApiAccessType } from "../model/enum/ApiAccessType";
 import { P2PB2B } from "../model/exchange/P2PB2B";
 import { getErrorOrderBook, getSuccessOrderBook, OrderBook } from "../model/OrderBook";
+import { OrderBookCacheRepository } from "../repository/OrderBookCacheRepository";
 
 export interface INormalizationOrderBook {
     exchangeId: ExchangeId;
@@ -59,6 +60,15 @@ export class OrderbookCrawler {
 
 
     private async execute() {
+    
+        // check cache
+        const cacheInstance = OrderBookCacheRepository.instance;
+        const cache = cacheInstance.read(this.exchange.exchangeId, this.currencyPair, this.exchange.cacheLifeitme);
+        if (cache !== null) {
+            // return cache result
+            return this.generateResult(cache.orderbook, cache.bridgePrice, cache.bridgeCoefficient);
+        }
+
         const axiosClient = this.getAxiosClient();
 
         const orderbookUrl = `${this.exchange.getApiUrlOrderbook(OrderBookUrlType.all)}${this.exchange.getPairSymbol(this.currencyPair)}`;
@@ -76,6 +86,7 @@ export class OrderbookCrawler {
         const orderbook = this.exchange.getNormalizationOrderBook(this.currencyPair, orderbookResponse.data);
         //console.log("orderBook:" + JSON.stringify(orderBook));
         if (orderbook.isVoid()) {
+            cacheInstance.save({orderbook: orderbook, bridgePrice: null, bridgeCoefficient: null})
             return this.generateResult(orderbook, null, null);
         }
 
@@ -110,6 +121,7 @@ export class OrderbookCrawler {
             }
         }
 
+        cacheInstance.save({orderbook: orderbook, bridgePrice: bridgePrice, bridgeCoefficient: bridgeCoefficient})
         return this.generateResult(orderbook, bridgePrice, bridgeCoefficient);
     }
 

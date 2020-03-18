@@ -23,7 +23,8 @@ export class Exchange {
         readonly apiUrlOrderbook: IApiUrlOrderBook[],
         readonly apiUrlBridgePrice: string | null,
         readonly currencyPairArray: ICurrencyPair[],
-        readonly apiCallInterval: number = 0)
+        readonly apiCallInterval: number = 0,
+        readonly cacheLifeitme: number = 10)
     {}
 
     get exchangeName(): string {
