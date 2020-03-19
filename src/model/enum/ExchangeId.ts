@@ -10,7 +10,8 @@ enum ExchangeId {
     CoinBene,
     fatbtc,
     DEXTRADE,
-    BITLOCUS
+    BITLOCUS,
+    FXADK
 }
 
 export {ExchangeId};
