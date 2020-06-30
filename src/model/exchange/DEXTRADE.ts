@@ -67,7 +67,7 @@ export class DEXTRADE extends Exchange {
 
     getBridgePrice(jsonObject: any): number {
         const originBridgePrice = <IBridgePrice_DEXTRADE>jsonObject;
-        return originBridgePrice.data.last;
+        return Number(originBridgePrice.data.last);
     }
 
 }
