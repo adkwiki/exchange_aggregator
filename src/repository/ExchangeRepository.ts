@@ -16,6 +16,7 @@ import { fatbtc } from "../model/exchange/fatbtc";
 import { DEXTRADE } from "../model/exchange/DEXTRADE";
 import { BITLOCUS } from "../model/exchange/BITLOCUS";
 import { FXADK } from "../model/exchange/FXADK";
+import { WhiteBIT } from "../model/exchange/WhiteBIT";
 
 export class ExchangeRepository {
 
@@ -38,6 +39,7 @@ export class ExchangeRepository {
     this._exchangeArray.push(ExchangeFactory.createInstance(DEXTRADE));
     this._exchangeArray.push(ExchangeFactory.createInstance(BITLOCUS));
     this._exchangeArray.push(ExchangeFactory.createInstance(FXADK));
+    this._exchangeArray.push(ExchangeFactory.createInstance(WhiteBIT));
   }
 
   public static get instance(): ExchangeRepository {
