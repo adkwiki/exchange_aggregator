@@ -12,7 +12,8 @@ enum ExchangeId {
     DEXTRADE,
     BITLOCUS,
     FXADK,
-    WhiteBIT
+    WhiteBIT,
+    INDOEX
 }
 
 export {ExchangeId};

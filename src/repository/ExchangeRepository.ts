@@ -17,6 +17,7 @@ import { DEXTRADE } from "../model/exchange/DEXTRADE";
 import { BITLOCUS } from "../model/exchange/BITLOCUS";
 import { FXADK } from "../model/exchange/FXADK";
 import { WhiteBIT } from "../model/exchange/WhiteBIT";
+import { INDOEX } from "../model/exchange/INDOEX";
 
 export class ExchangeRepository {
 
@@ -40,6 +41,7 @@ export class ExchangeRepository {
     this._exchangeArray.push(ExchangeFactory.createInstance(BITLOCUS));
     this._exchangeArray.push(ExchangeFactory.createInstance(FXADK));
     this._exchangeArray.push(ExchangeFactory.createInstance(WhiteBIT));
+    this._exchangeArray.push(ExchangeFactory.createInstance(INDOEX));
   }
 
   public static get instance(): ExchangeRepository {
