@@ -39,8 +39,6 @@ export class STEX extends Exchange {
             [
                 {left: CurrencyId.ADK, right: CurrencyId.BTC},
                 {left: CurrencyId.ADK, right: CurrencyId.ETH, bridge: {left: CurrencyId.ETH, right: CurrencyId.BTC}},
-                {left: CurrencyId.ADK, right: CurrencyId.USD, bridge: {left: CurrencyId.BTC, right: CurrencyId.USD}},
-                {left: CurrencyId.ADK, right: CurrencyId.EUR, bridge: {left: CurrencyId.BTC, right: CurrencyId.EUR}}
             ]);
     }
 
@@ -51,14 +49,6 @@ export class STEX extends Exchange {
             return "952";
         } else if (pair.left === CurrencyId.ETH && pair.right === CurrencyId.BTC) {
             return "2";
-        } else if (pair.left === CurrencyId.ADK && pair.right === CurrencyId.USD) {
-            return "744";
-        } else if (pair.left === CurrencyId.BTC && pair.right === CurrencyId.USD) {
-            return "702";
-        } else if (pair.left === CurrencyId.ADK && pair.right === CurrencyId.EUR) {
-            return "745";
-        } else if (pair.left === CurrencyId.BTC && pair.right === CurrencyId.EUR) {
-            return "703";
         } else {
             throw new Error(`stex unknown pair ${pair.left}/${pair.right}:`)
         }

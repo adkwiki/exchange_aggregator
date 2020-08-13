@@ -18,12 +18,13 @@ import { BITLOCUS } from "../model/exchange/BITLOCUS";
 import { FXADK } from "../model/exchange/FXADK";
 import { WhiteBIT } from "../model/exchange/WhiteBIT";
 import { INDOEX } from "../model/exchange/INDOEX";
+import { BithumbGlobal } from "../model/exchange/BithumbGlobal";
 
 export class ExchangeRepository {
 
   private static _instance: ExchangeRepository;
 
-  private _exchangeArray : Exchange[]; 
+  private _exchangeArray: Exchange[];
 
   private constructor() {
     this._exchangeArray = [];
@@ -42,6 +43,7 @@ export class ExchangeRepository {
     this._exchangeArray.push(ExchangeFactory.createInstance(FXADK));
     this._exchangeArray.push(ExchangeFactory.createInstance(WhiteBIT));
     this._exchangeArray.push(ExchangeFactory.createInstance(INDOEX));
+    this._exchangeArray.push(ExchangeFactory.createInstance(BithumbGlobal));
   }
 
   public static get instance(): ExchangeRepository {
@@ -52,7 +54,7 @@ export class ExchangeRepository {
   }
 
   get exchangeArray(): Exchange[] {
-      return this._exchangeArray;
+    return this._exchangeArray;
   }
 
   getExchange(exchangeId: ExchangeId): Exchange | null {
@@ -69,7 +71,7 @@ export class ExchangeRepository {
     if (exchange === null) {
       return null;
     }
-    
+
     for (const ex_currencyPair of exchange.currencyPairArray) {
       if (ex_currencyPair.left == currencyPair.left && ex_currencyPair.right == currencyPair.right) {
         return ex_currencyPair;

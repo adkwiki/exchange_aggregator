@@ -19,9 +19,6 @@
     "url": "https://github.com/adkwiki/exchange_aggregator/issues"
   },
   "homepage": "https://github.com/adkwiki/exchange_aggregator#readme",
-  "engines": {
-    "node": "12.9.1"
-  },
   "jest": {
     "transform": {
       "^.+\\.tsx?$": "ts-jest"
