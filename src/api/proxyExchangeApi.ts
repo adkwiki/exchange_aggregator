@@ -16,7 +16,7 @@ export class ProxyExchangeApi {
         const exchangeRepo: ExchangeRepository = ExchangeRepository.instance;
 
         let promises = [];
-        for (const cpParam of req.query.cp) {
+        for (const cpParam of req.query.cp as string[]) {
             var paramElems = cpParam.split('_');
             if (paramElems.length != 3) {
                 console.log(`invalid param ${cpParam}`);
@@ -33,7 +33,7 @@ export class ProxyExchangeApi {
                 return;
             }
 
-            const currencyPair = exchangeRepo.getCurrencyPair(exchangeId, {left: Number(paramElems[1]), right: Number(paramElems[2])});
+            const currencyPair = exchangeRepo.getCurrencyPair(exchangeId, { left: Number(paramElems[1]), right: Number(paramElems[2]) });
             if (currencyPair === null) {
                 console.log(`invalid param : currencyPair ${paramElems}`)
                 res.sendStatus(400);
@@ -42,7 +42,7 @@ export class ProxyExchangeApi {
 
             //console.log(JSON.stringify(currencyPair));
 
-            const promise = new Promise((resolve, reject) => { 
+            const promise = new Promise((resolve, reject) => {
                 const orderbookCrawler: OrderbookCrawler = new OrderbookCrawler(exchange, currencyPair);
                 resolve(orderbookCrawler.crawl());
             });
@@ -53,10 +53,10 @@ export class ProxyExchangeApi {
             //console.log("orderbook: " + JSON.stringify(orderbook));
             res.send(JSON.stringify(orderbook));
         })
-        .catch((reason) => {
-            console.log(reason);
-            res.sendStatus(500);
-            return;
-        });        
+            .catch((reason) => {
+                console.log(reason);
+                res.sendStatus(500);
+                return;
+            });
     }
 }
