@@ -20,9 +20,9 @@ interface IOrdreBook_BithumbGlobal {
 interface IBridgePrice_BithumbGlobal {
     code: string;
     msg: string;
-    data: {
-        c: string;
-    }
+    data: [
+        { c: string; }
+    ]
 }
 
 export class BithumbGlobal extends Exchange {
@@ -71,6 +71,6 @@ export class BithumbGlobal extends Exchange {
         if (originBridgePrice.code !== "0") {
             throw new Error("failed : getBridgePrice");
         }
-        return Number(originBridgePrice.data.c);
+        return Number(originBridgePrice.data[0].c);
     }
 }
