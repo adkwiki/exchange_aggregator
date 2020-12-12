@@ -14,7 +14,8 @@ enum ExchangeId {
     FXADK,
     WhiteBIT,
     INDOEX,
-    BithumbGlobal
+    BithumbGlobal,
+    BittrexGlobal
 }
 
-export {ExchangeId};
+export { ExchangeId };

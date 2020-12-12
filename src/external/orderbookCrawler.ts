@@ -17,20 +17,22 @@ export interface INormalizationOrderBook {
     bridgeCoefficient: number | null;
 }
 
+export const URL_REPLACE_KEYWORD_PAIR_SYMBOL = "{PairSymbol}";
+
 export class OrderbookCrawler {
     constructor(readonly exchange: Exchange, readonly currencyPair: ICurrencyPair) {
     }
 
     async crawl() {
-        switch(this.exchange.apiAccessType) {
-        case ApiAccessType.plane:
-            return this.execute();
-        case ApiAccessType.cloudflare:
-            return this.executeBypassCloudflare();
-        case ApiAccessType.askBidSplitInterface:
-            return this.executeAskBidSplitInterface();
-        default:
-            throw new Error(`unknown ApiAccessType ${this.exchange.apiAccessType}`);
+        switch (this.exchange.apiAccessType) {
+            case ApiAccessType.plane:
+                return this.execute();
+            case ApiAccessType.cloudflare:
+                return this.executeBypassCloudflare();
+            case ApiAccessType.askBidSplitInterface:
+                return this.executeAskBidSplitInterface();
+            default:
+                throw new Error(`unknown ApiAccessType ${this.exchange.apiAccessType}`);
         }
     }
 
@@ -38,17 +40,16 @@ export class OrderbookCrawler {
         return axios.create({
             baseURL: this.exchange.apiUrlBase,
             headers: {
-              'Content-Type': 'application/json',
+                'Content-Type': 'application/json',
             },
-            responseType: 'json'  
+            responseType: 'json'
         });
     }
 
     private generateResult(
         orderbook: OrderBook,
         bridgePrice: number | null,
-        bridgeCoefficient: number | null): INormalizationOrderBook
-    {
+        bridgeCoefficient: number | null): INormalizationOrderBook {
         return {
             exchangeId: this.exchange.exchangeId,
             currencyPair: this.currencyPair,
@@ -60,7 +61,7 @@ export class OrderbookCrawler {
 
 
     private async execute() {
-    
+
         // check cache
         const cacheInstance = OrderBookCacheRepository.instance;
         const cache = cacheInstance.read(this.exchange.exchangeId, this.currencyPair, this.exchange.cacheLifeitme);
@@ -71,13 +72,23 @@ export class OrderbookCrawler {
 
         const axiosClient = this.getAxiosClient();
 
-        const orderbookUrl = `${this.exchange.getApiUrlOrderbook(OrderBookUrlType.all)}${this.exchange.getPairSymbol(this.currencyPair)}`;
+        const orderbookBaseUrl = `${this.exchange.getApiUrlOrderbook(OrderBookUrlType.all)}`;
+        const pairSymbol = `${this.exchange.getPairSymbol(this.currencyPair)}`;
+
+        // generate API URL
+        let orderbookUrl;
+        if (orderbookBaseUrl.indexOf(URL_REPLACE_KEYWORD_PAIR_SYMBOL) !== -1) {
+            orderbookUrl = orderbookBaseUrl.replace(URL_REPLACE_KEYWORD_PAIR_SYMBOL, pairSymbol)
+        } else {
+            orderbookUrl = `${this.exchange.getApiUrlOrderbook(OrderBookUrlType.all)}${this.exchange.getPairSymbol(this.currencyPair)}`;
+        }
+
         //console.log("orderbookUrl:" + orderbookUrl);
 
         let orderbookResponse;
         try {
             orderbookResponse = await axiosClient.get(orderbookUrl);
-        } catch(error) {
+        } catch (error) {
             console.log(error);
             return this.generateResult(getErrorOrderBook(this.exchange.exchangeId, this.currencyPair), null, null);
         }
@@ -86,7 +97,7 @@ export class OrderbookCrawler {
         const orderbook = this.exchange.getNormalizationOrderBook(this.currencyPair, orderbookResponse.data);
         //console.log("orderBook:" + JSON.stringify(orderBook));
         if (orderbook.isVoid()) {
-            cacheInstance.save({orderbook: orderbook, bridgePrice: null, bridgeCoefficient: null})
+            cacheInstance.save({ orderbook: orderbook, bridgePrice: null, bridgeCoefficient: null })
             return this.generateResult(orderbook, null, null);
         }
 
@@ -100,17 +111,17 @@ export class OrderbookCrawler {
             if (this.currencyPair.bridge === undefined) {
                 throw new Error(`invalid pair ${this.exchange.exchangeId} ${this.currencyPair.left} ${this.currencyPair.right}`);
             }
-            const bridgePair: ICurrencyPair = {left: this.currencyPair.bridge.left, right: this.currencyPair.bridge.right};
+            const bridgePair: ICurrencyPair = { left: this.currencyPair.bridge.left, right: this.currencyPair.bridge.right };
             const bridgePairUrl = `${this.exchange.apiUrlBridgePrice}${this.exchange.getPairSymbol(bridgePair)}`;
-            
+
             let bridgePriceResponse;
             try {
                 bridgePriceResponse = await axiosClient.get(bridgePairUrl);
-            } catch(error) {
+            } catch (error) {
                 console.log(error);
                 return this.generateResult(getErrorOrderBook(this.exchange.exchangeId, this.currencyPair), null, null);
             }
-                
+
             bridgePrice = this.exchange.getBridgePrice(bridgePriceResponse.data);
 
             if (this.currencyPair.bridge.left === CurrencyId.BTC) {
@@ -121,11 +132,11 @@ export class OrderbookCrawler {
             }
         }
 
-        cacheInstance.save({orderbook: orderbook, bridgePrice: bridgePrice, bridgeCoefficient: bridgeCoefficient})
+        cacheInstance.save({ orderbook: orderbook, bridgePrice: bridgePrice, bridgeCoefficient: bridgeCoefficient })
         return this.generateResult(orderbook, bridgePrice, bridgeCoefficient);
     }
 
-    private async executeAskBidSplitInterface(){
+    private async executeAskBidSplitInterface() {
         // for P2PB2B
         const axiosClient = this.getAxiosClient();
 
@@ -134,7 +145,7 @@ export class OrderbookCrawler {
         let orderbookResponseBuy;
         try {
             orderbookResponseBuy = await axiosClient.get(orderbookUrl);
-        } catch(error) {
+        } catch (error) {
             console.log(error);
             return this.generateResult(getErrorOrderBook(this.exchange.exchangeId, this.currencyPair), null, null);
         }
@@ -146,11 +157,11 @@ export class OrderbookCrawler {
 
         // sell
         orderbookUrl = `${this.exchange.getApiUrlOrderbook(OrderBookUrlType.sell)}${this.exchange.getPairSymbol(this.currencyPair)}`;
-    
+
         let orderbookResponseSell;
         try {
             orderbookResponseSell = await axiosClient.get(orderbookUrl);
-        } catch(error) {
+        } catch (error) {
             console.log(error);
             return this.generateResult(getErrorOrderBook(this.exchange.exchangeId, this.currencyPair), null, null);
         }
@@ -159,13 +170,13 @@ export class OrderbookCrawler {
         if (orderbookSell === null) {
             return this.generateResult(getErrorOrderBook(this.exchange.exchangeId, this.currencyPair), null, null);
         }
-        
+
         const meargedOrderbook = getSuccessOrderBook(this.exchange.exchangeId, this.currencyPair, orderbookBuy, orderbookSell);
 
         return this.generateResult(meargedOrderbook, null, null);
     }
 
-    private async executeBypassCloudflare(){
+    private async executeBypassCloudflare() {
 
         const orderbookUrl = `${this.exchange.getApiUrlOrderbook(OrderBookUrlType.all)}${this.exchange.getPairSymbol(this.currencyPair)}`;
 
@@ -181,7 +192,7 @@ export class OrderbookCrawler {
         let orderbookResponse;
         try {
             orderbookResponse = await cloudscraper.get(options);
-        } catch(error) {
+        } catch (error) {
             console.log(error);
             return this.generateResult(getErrorOrderBook(this.exchange.exchangeId, this.currencyPair), null, null);
         }
@@ -198,5 +209,5 @@ export class OrderbookCrawler {
             }, time);
         });
     }
-    
+
 }

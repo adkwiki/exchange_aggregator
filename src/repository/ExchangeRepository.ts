@@ -19,6 +19,7 @@ import { FXADK } from "../model/exchange/FXADK";
 import { WhiteBIT } from "../model/exchange/WhiteBIT";
 import { INDOEX } from "../model/exchange/INDOEX";
 import { BithumbGlobal } from "../model/exchange/BithumbGlobal";
+import { BittrexGlobal } from "../model/exchange/BittrexGlobal";
 
 export class ExchangeRepository {
 
@@ -44,6 +45,7 @@ export class ExchangeRepository {
     this._exchangeArray.push(ExchangeFactory.createInstance(WhiteBIT));
     this._exchangeArray.push(ExchangeFactory.createInstance(INDOEX));
     this._exchangeArray.push(ExchangeFactory.createInstance(BithumbGlobal));
+    this._exchangeArray.push(ExchangeFactory.createInstance(BittrexGlobal));
   }
 
   public static get instance(): ExchangeRepository {
